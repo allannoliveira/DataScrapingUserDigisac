@@ -1,140 +1,152 @@
-📘 Guia: Como Extrair Todos os Usuários do DigiSac Usando o Script no Navegador
+# 📘 Extração de Usuários do DigiSac via Console do Navegador
 
-Este guia explica passo a passo como coletar todos os usuários de um setor no DigiSac, mesmo quando o sistema mostra apenas 15 resultados por página.
-O processo utiliza um script simples executado diretamente no Console do navegador (Chrome).
+Este repositório contém instruções e o script utilizado para extrair **todos os usuários listados no DigiSac**, mesmo quando o sistema mostra apenas 15 usuários por página.  
+A técnica utiliza um script em JavaScript executado diretamente no **Console do Chrome**, que navega automaticamente por todas as páginas e gera um arquivo `.csv` completo.
 
-🔧 Requisitos
+----------
 
-Navegador Google Chrome
+## 📌 Índice
 
-Acesso ao painel de usuários dentro do DigiSac
+-   Visão Geral
+    
+-   Requisitos
+    
+-   Passo a Passo
+    
+    -   1. Acessar a lista de usuários
+        
+    -   2. Abrir o Console do Chrome
+        
+    -   3. Habilitar colagem de código
+        
+    -   4. Executar o script
+        
+-   Script Completo
+    
+-   Saída Gerada
+    
+-   Possíveis Problemas
+    
+-   Licença
+    
 
-Permissão de visualização das páginas paginadas
+----------
 
-🧭 Passo 1 — Acessar a tela de usuários
+## 📖 Visão Geral
 
-Entre no DigiSac normalmente.
+O DigiSac exibe apenas **15 usuários por página**, tornando difícil coletar todos os registros.  
+Este script:
 
-Abra o menu onde estão listados os usuários do setor.
+-   Percorre automaticamente **todas as páginas** usando o botão “Go to next page”
+    
+-   Captura todas as linhas visíveis da tabela
+    
+-   Monta um arquivo `.csv`
+    
+-   Efetua automaticamente o download do arquivo completo
+    
 
-Verifique que a lista está exibindo apenas 15 resultados, com paginação (ex.: “Mostrando 15 de 107 resultados”).
+----------
 
-🛠️ Passo 2 — Abrir o Console do Chrome
+## 🧑‍💻 Requisitos
 
-No teclado, pressione:
+-   Google Chrome
+    
+-   Acesso ao **DigiSac**
+    
+-   Permissão para visualizar a lista de usuários
+    
 
-F12
+----------
 
+## 🧭 Passo a Passo
 
-Na janela que abrir, selecione a aba:
+### **1. Acessar a lista de usuários**
 
-Console
+No DigiSac, abra o módulo onde os usuários do setor estão listados.
 
-🔒 Passo 3 — Habilitar a colagem de scripts no Chrome
+----------
 
-Por segurança, o Chrome exibe um alerta ao colar código no Console.
+### **2. Abrir o Console do Chrome**
+
+Use o atalho:
+
+`F12` 
+
+E clique na aba:
+
+`Console` 
+
+----------
+
+### **3. Habilitar colagem de código**
+
+Por segurança, o Chrome não permite colar scripts no console sem liberação.
 
 Digite:
 
-allow pasting
+`allow pasting` 
 
+Pressione **Enter**.
 
-e pressione Enter.
+----------
 
-Isso libera a colagem do script no passo seguinte.
+### **4. Executar o script**
 
-🚀 Passo 4 — Executar o Script
+Cole o script abaixo e pressione **Enter**.
 
-Copie e cole o script abaixo inteiro no Console e pressione Enter:
+----------
 
-async function coletarTodasAsPaginas() {
-  // Função que coleta os dados da tabela atual
-  function coletarUsuarios() {
-    const linhas = [...document.querySelectorAll('tr')];
-    return linhas.map(linha => {
-      const colunas = [...linha.querySelectorAll('td')].map(td => td.innerText.trim());
-      return colunas.join(';');
+## 🧩 Script Completo
+
+``async  function  coletarTodasAsPaginas() { // Função que coleta os dados da tabela atual  function  coletarUsuarios() { const linhas = [...document.querySelectorAll('tr')]; return linhas.map(linha => { const colunas = [...linha.querySelectorAll('td')].map(td => td.innerText.trim()); return colunas.join(';');
     }).filter(l => l);
-  }
-
-  let resultados = [];
-  let pagina = 1;
-
-  while (true) {
-    console.log(`📄 Coletando página ${pagina}...`);
-    resultados.push(...coletarUsuarios());
-
-    // Localiza o botão "Próximo"
-    const botaoProximo = document.querySelector('button[aria-label="Go to next page"]');
-
-    // Sai do loop se não encontrar ou estiver desabilitado
-    if (!botaoProximo || botaoProximo.disabled) {
-      console.log("🚫 Última página alcançada.");
-      break;
-    }
-
-    // Clica no botão e espera a próxima página carregar
-    botaoProximo.click();
-    await new Promise(r => setTimeout(r, 2500));
+  } let resultados = []; let pagina = 1; while (true) { console.log(`📄 Coletando página ${pagina}...`);
+    resultados.push(...coletarUsuarios()); // Localiza o botão "Próximo"  const botaoProximo = document.querySelector('button[aria-label="Go to next page"]'); // Sai do loop se não encontrar ou estiver desabilitado  if (!botaoProximo || botaoProximo.disabled) { console.log("🚫 Última página alcançada."); break;
+    } // Clica no botão e espera a próxima página carregar botaoProximo.click(); await  new  Promise(r => setTimeout(r, 2500));
     pagina++;
-  }
-
-  // Cria o CSV e baixa automaticamente
-  const csv = resultados.join('\n');
-  const blob = new Blob([csv], { type: 'text/csv' });
-  const link = document.createElement('a');
+  } // Cria o CSV e baixa automaticamente  const csv = resultados.join('\n'); const blob = new  Blob([csv], { type: 'text/csv' }); const link = document.createElement('a');
   link.href = URL.createObjectURL(blob);
-  link.download = 'usuarios_digisac.csv';
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
+  link.download = 'usuarios_digisac.csv'; document.body.appendChild(link);
+  link.click(); document.body.removeChild(link); console.log('✅ Exportação concluída! Total de registros:', resultados.length);
+} coletarTodasAsPaginas();`` 
 
-  console.log('✅ Exportação concluída! Total de registros:', resultados.length);
-}
+----------
 
-coletarTodasAsPaginas();
+## 📂 Saída Gerada
 
-📝 O que o script faz?
+O arquivo baixado terá o nome:
 
-Lê todas as linhas da tabela exibida na página.
+`usuarios_digisac.csv` 
 
-Clica automaticamente no botão:
+E conterá exatamente as colunas visíveis na tabela do DigiSac, algo como:
 
-aria-label="Go to next page"
+`Nome;Email;Função;Grupo
+Allan Oliveira;allan@empresa.com;Administrador;ESCALAS
+Maria Souza;maria@empresa.com;Atendente;SUPORTE
+...` 
 
+----------
 
-Repete o processo até chegar na última página.
+## ⚠️ Possíveis Problemas
 
-Gera um arquivo chamado:
+### 🔸 O script não troca de página
 
-usuarios_digisac.csv
+Verifique se o botão realmente possui:
 
+`aria-label="Go to next page"` 
 
-E baixa automaticamente no seu computador.
+Se for diferente no seu painel, ajuste o seletor ou abra uma issue.
 
-📂 Estrutura do arquivo gerado
+### 🔸 O arquivo CSV abre bagunçado no Excel
 
-O arquivo CSV conterá as colunas da tabela exatamente como aparecem na interface do DigiSac, por exemplo:
+Use a opção:
 
-Nome;Email;Função;Grupo
-João Silva;joao@empresa.com;Atendente;ESCALAS
-Maria Souza;maria@empresa.com;Administrador;ESCALAS
-...
+`Dados → Texto para colunas → Delimitado → Ponto e vírgula` 
 
-🧩 Dicas importantes
+----------
 
-Não feche a aba do DigiSac enquanto o script estiver rodando.
+## 📜 Licença
 
-O tempo total depende de quantas páginas existem.
-
-Caso os dados não apareçam corretamente no Excel, use “Texto para colunas” via delimitador ;.
-
-❓ Problemas comuns
-🔸 O script não avança de página
-
-➡️ Verifique se o botão realmente possui o atributo:
-
-aria-label="Go to next page"
-
-
-Se não tiver, envie o HTML do botão e posso ajustar o script para você.
+Este projeto é distribuído sob a licença **MIT**.  
+Você pode usar, modificar e compartilhar livremente.
